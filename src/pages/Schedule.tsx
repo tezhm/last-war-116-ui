@@ -82,7 +82,6 @@ function defaultRows(stepSize: number): ScheduleRow[] {
 
 interface ScheduleProps {
     title: Title;
-    username: string;
 }
 
 interface ScheduleRow {
@@ -93,6 +92,7 @@ interface ScheduleRow {
 }
 
 interface ScheduleState {
+    inGameName: string|null;
     rows: ScheduleRow[];
     loading: boolean;
     showDialog: boolean;
@@ -108,6 +108,7 @@ interface ScheduleState {
 
 export function Schedule(props: ScheduleProps): JSX.Element {
     const [state, setState] = useState<ScheduleState>({
+        inGameName: null,
         rows: [],
         loading: true,
         showDialog: false,
@@ -142,6 +143,10 @@ export function Schedule(props: ScheduleProps): JSX.Element {
 
             setState((state) => ({ ...state, rows: rows, loading: false }));
         });
+
+        ApiClient.getInstance().queryUserInfo().then((userInfo) => {
+            setState((state) => ({ ...state, inGameName: userInfo.inGameName }));
+        });
     }, [props]);
 
     const indicatorSize = 80;
@@ -169,8 +174,8 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                 >
                     <Fade in={state.loading}>
                         <CircularProgress
-                            color="inherit"
                             sx={{
+                                color: "white",
                                 position: "absolute",
                                 top: "50%",
                                 left: "50%",
@@ -190,18 +195,18 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                         </TableHead>
                         <TableBody>
                             { state.rows.map((row, index) => (row.account === null) ?
-                                <BodyRow key={row.timestamp} hover onClick={() => setState({
+                                <BodyRow key={row.timestamp} hover onClick={() => setState((state) => ({
                                     ...state,
                                     showDialog: true,
                                     index: index,
                                     timestamp: row.timestamp,
                                     timeString: row.timeString
-                                })}>
+                                }))}>
                                     <TableCell component="th" scope="row">
                                         <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                     </TableCell>
                                     <TableCell align={"center"}></TableCell>
-                                </BodyRow> : row.account === props.username ?
+                                </BodyRow> : row.account === state.inGameName ?
                                     <SelectedRow key={row.timestamp}>
                                         <TableCell component="th" scope="row">
                                             <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
@@ -233,7 +238,7 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                             try {
                                 await ApiClient.getInstance().reserve(props.title.id, state.timestamp);
                                 setState((state) => {
-                                    state.rows[state.index ?? -1].account = props.username;
+                                    state.rows[state.index ?? -1].account = state.inGameName;
                                     return { ...state, loading: false };
                                 });
                             } catch (error) {

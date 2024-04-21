@@ -3,7 +3,7 @@ import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import { JSX, ReactNode } from "react";
-import { Copyright } from "./Copyright";
+import { BuyMeCoffee } from "./BuyMeCoffee";
 import { NavBar } from "./NavBar";
 
 interface DashboardProps {
@@ -32,7 +32,7 @@ export function Dashboard(props: DashboardProps): JSX.Element {
                 <Toolbar />
                 <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                     {props.children}
-                    <Copyright />
+                    <BuyMeCoffee />
                 </Container>
             </Box>
         </Box>

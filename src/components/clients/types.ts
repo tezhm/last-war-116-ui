@@ -1,3 +1,9 @@
+export interface UserInfo {
+    isAdmin: boolean;
+    inGameName: string;
+    verificationCode: string;
+}
+
 export interface ScheduleInfo {
     // Interval in minutes
     slotInterval: number;

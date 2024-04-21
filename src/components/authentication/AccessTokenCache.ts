@@ -21,6 +21,7 @@ export class AccessTokenCache {
 
     public invalidate(): void {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
+        this.accessToken = null;
         this.loaded = false;
     }
 

@@ -1,6 +1,6 @@
 import { app } from "../../config/app";
 import { AccessTokenCache } from "../authentication/AccessTokenCache";
-import { Scheduled } from "./types";
+import { Scheduled, UserInfo } from "./types";
 
 export class ApiClient {
     private static instance: ApiClient|null = null;
@@ -11,6 +11,16 @@ export class ApiClient {
         }
 
         return ApiClient.instance;
+    }
+
+    public async queryUserInfo(): Promise<UserInfo> {
+        const response = await this.authFetch("/v1/user/info");
+
+        if (!response) {
+            throw new Error("Failed to query user info");
+        }
+
+        return await response.json();
     }
 
     public async queryScheduled(title: string, start: number, end: number): Promise<Scheduled> {
@@ -48,6 +58,22 @@ export class ApiClient {
 
         if (!response) {
             throw new Error(`Failed to reserve ${title} at ${timestamp}`);
+        }
+    }
+
+    public async changeInGameName(inGameName: string): Promise<void> {
+        const response = await this.authPost("/v1/user/change-in-game-name", undefined, { inGameName });
+
+        if (!response) {
+            throw new Error("Failed to change in game name");
+        }
+    }
+
+    public async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+        const response = await this.authPost("/v1/user/change-password", undefined, { currentPassword, newPassword });
+
+        if (!response) {
+            throw new Error("Failed to change password");
         }
     }
 

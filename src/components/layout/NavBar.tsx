@@ -77,7 +77,7 @@ interface NavBarState {
 }
 
 export function NavBar(props: NavBarProps): JSX.Element {
-    const [state, setState] = useState<NavBarState>({ open: false, isAdmin: true });
+    const [state, setState] = useState<NavBarState>({ open: false, isAdmin: false });
 
     return (
         <Fragment>
@@ -143,7 +143,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
                         </Fragment> : null
                     }
                     <Divider />
-                    <NavLink currentUrl={props.currentUrl} targetUrl="/secretary-of-interior">
+                    <NavLink currentUrl={props.currentUrl} targetUrl="/settings">
                         <ListItemIcon><SettingsIcon /></ListItemIcon>
                         <ListItemText primary="Settings" />
                     </NavLink>
