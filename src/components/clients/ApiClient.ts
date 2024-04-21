@@ -23,7 +23,7 @@ export class ApiClient {
     }
 
     public async queryScheduled(title: string, start: number, end: number): Promise<Scheduled> {
-        const response = await this.fetch(`/v1/schedule/${title}/index`, { start, end });
+        const response = await this.authFetch(`/v1/schedule/${title}/index`, { start, end });
 
         if (!response) {
             throw new Error(`Failed to query scheduled for ${title}`);
@@ -32,50 +32,66 @@ export class ApiClient {
         return await response.json();
     }
 
+    public async login(username: string, password: string): Promise<string> {
+        const response = await this.post(`/v1/login`, undefined, { username, password });
+
+        if (!response) {
+            throw new Error(`Failed to login`);
+        }
+
+        return (await response.json()).accessToken;
+    }
+
     public async reserve(title: string, timestamp: number): Promise<void> {
-        const response = await this.post(`/v1/schedule/${title}/reserve/${timestamp}`);
+        const response = await this.authPost(`/v1/schedule/${title}/reserve/${timestamp}`);
 
         if (!response) {
             throw new Error(`Failed to reserve ${title} at ${timestamp}`);
         }
     }
 
-    private async fetch(url: string, params?: Record<string, any>): Promise<Response|null> {
+    private async authFetch(url: string, params?: Record<string, any>): Promise<Response|null> {
         try {
-            const response = await fetch(`${app.API_URL}${url}?_at=${this.getAccessToken()}${this.parseParams(params)}`);
-
-            // Pre-flight can return successfully when failing authentication
-            if (!response.ok) {
-                if (response.status === 401) {
-                    this.clearAccessToken();
-                    AccessTokenCache.getInstance().logout();
-                }
-
-                return null;
-            }
-
-            return response;
-        } catch (error) {
-            // TODO: check if auth failed
+            return await this.fetch(`${app.API_URL}${url}?_at=${this.getAccessToken()}${this.parseParams(params)}`);
+        } catch {
             return null;
         }
     }
 
-    private async post(url: string, params?: Record<string, any>, data?: object): Promise<Response> {
-        const response = await fetch(`${app.API_URL}${url}?_at=${this.getAccessToken()}${this.parseParams(params)}`, {
+    private async authPost(url: string, params?: Record<string, any>, data?: object): Promise<Response> {
+        return await this.fetch(`${app.API_URL}${url}?_at=${this.getAccessToken()}${this.parseParams(params)}`, {
             method: "POST",
             headers: { "Content-type": "application/json" },
             body: JSON.stringify(data),
         });
+    }
+
+    private async post(url: string, params?: Record<string, any>, data?: object): Promise<Response> {
+        const init = {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(data),
+        };
+
+        if (params && Object.keys(params).length > 0) {
+            return await this.fetch(`${app.API_URL}${url}?${this.parseParams(params).substring(1)}`, init);
+        }
+
+        return await this.fetch(`${app.API_URL}${url}`, init);
+    }
+
+    private async fetch(url: string, init?: RequestInit): Promise<Response> {
+        const response = await fetch(url, init);
 
         // Pre-flight can return successfully when failing authentication
         if (!response.ok) {
             if (response.status === 401) {
                 this.clearAccessToken();
-                AccessTokenCache.getInstance().logout();
+                AccessTokenCache.getInstance().invalidate();
+                window.location.href = "/login";
             }
 
-            const errors = await response.json();
+            const errors = await this.decodeResponse(response);
 
             if (errors?.errors?.length !== 0) {
                 throw new Error(errors.errors[0].msg);
@@ -107,5 +123,13 @@ export class ApiClient {
         }
 
         return this.accessToken;
+    }
+
+    private async decodeResponse(response: Response): Promise<any|null> {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
     }
 }

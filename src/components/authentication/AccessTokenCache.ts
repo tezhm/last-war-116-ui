@@ -1,5 +1,3 @@
-import { redirect } from "react-router-dom";
-
 export const ACCESS_TOKEN_KEY: string = "_at";
 
 export class AccessTokenCache {
@@ -13,6 +11,14 @@ export class AccessTokenCache {
         return AccessTokenCache.instance;
     }
 
+    public update(accessToken: string): void {
+        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    }
+
+    public invalidate(): void {
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+
     public loadAccessToken(): string|null {
         const searchParams: URLSearchParams = new URLSearchParams(window.location.search);
 
@@ -21,17 +27,12 @@ export class AccessTokenCache {
             const accessToken = searchParams.get(ACCESS_TOKEN_KEY);
 
             if (accessToken) {
-                localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+                this.update(accessToken);
                 return accessToken;
             }
         }
 
         // Relying on local storage when no access token in url
         return localStorage.getItem(ACCESS_TOKEN_KEY);
-    }
-
-    public logout(): void {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        redirect("/login");
     }
 }

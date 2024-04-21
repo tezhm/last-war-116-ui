@@ -9,7 +9,7 @@ export function Authenticate(): JSX.Element {
 
     if (!accessToken) {
         ApiClient.getInstance().clearAccessToken();
-        AccessTokenCache.getInstance().logout();
+        AccessTokenCache.getInstance().invalidate();
     } else {
         ApiClient.getInstance().setAccessToken(accessToken);
     }

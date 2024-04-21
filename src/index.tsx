@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Authenticate } from "./components/authentication/Authenticate";
 import { titles } from "./components/titles/Titles";
+import { Login } from "./pages/Login";
 import { Schedule } from "./pages/Schedule";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
@@ -25,6 +26,7 @@ root.render(
         <ThemeProvider theme={theme}>
             <BrowserRouter>
                 <Routes>
+                    <Route path="/login" element={<Login />} />
                     <Route path="/" element={<Authenticate />}>
                         <Route path={titles.secretaryOfStrategy.url} element={<Schedule username={"asdads"} title={titles.secretaryOfStrategy} />} />
                         <Route path={titles.secretaryOfSecurity.url} element={<Schedule username={"asdads"} title={titles.secretaryOfSecurity} />} />

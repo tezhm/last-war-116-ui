@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import { Fragment, JSX, useState } from "react";
 import { titles } from "../titles/Titles";
 import { NavLink } from "./NavLink";
+import { AccessTokenCache } from "../authentication/AccessTokenCache";
 
 const drawerWidth: number = 290;
 
@@ -146,7 +147,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
                         <ListItemIcon><SettingsIcon /></ListItemIcon>
                         <ListItemText primary="Settings" />
                     </NavLink>
-                    <NavLink currentUrl={props.currentUrl} targetUrl="/secretary-of-interior">
+                    <NavLink currentUrl={props.currentUrl} targetUrl="/login" onClick={() => AccessTokenCache.getInstance().invalidate()}>
                         <ListItemIcon><LogoutIcon /></ListItemIcon>
                         <ListItemText primary="Logout" />
                     </NavLink>
