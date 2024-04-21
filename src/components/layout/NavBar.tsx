@@ -8,15 +8,14 @@ import Divider from "@mui/material/Divider";
 import MuiDrawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Fragment, JSX, useState } from "react";
-import { Link } from "react-router-dom";
-import { titles } from "../titles/titles";
+import { titles } from "../titles/Titles";
+import { NavLink } from "./NavLink";
 
 const drawerWidth: number = 290;
 
@@ -68,6 +67,7 @@ const Drawer = styled(MuiDrawer, {
 
 interface NavBarProps {
     pageTitle: string;
+    currentUrl: string;
 }
 
 interface NavBarState {
@@ -126,38 +126,30 @@ export function NavBar(props: NavBarProps): JSX.Element {
                 <List component="nav">
                     {Object.keys(titles).map((title, index) => {
                         return (
-                            <ListItemButton component={Link} to={titles[title].url} key={index}>
-                                <ListItemIcon>
-                                    {titles[title].icon}
-                                </ListItemIcon>
+                            <NavLink currentUrl={props.currentUrl} targetUrl={titles[title].url} key={index}>
+                                <ListItemIcon>{titles[title].icon}</ListItemIcon>
                                 <ListItemText primary={titles[title].name} />
-                            </ListItemButton>
+                            </NavLink>
                         );
                     })}
                     {state.isAdmin ?
                         <Fragment>
                             <Divider />
-                            <ListItemButton component={Link} to="/verification">
-                                <ListItemIcon>
-                                    <FingerprintIcon />
-                                </ListItemIcon>
+                            <NavLink currentUrl={props.currentUrl} targetUrl="/verification">
+                                <ListItemIcon><FingerprintIcon /></ListItemIcon>
                                 <ListItemText primary="Verification" />
-                            </ListItemButton>
+                            </NavLink>
                         </Fragment> : null
                     }
                     <Divider />
-                    <ListItemButton component={Link} to="/secretary-of-interior">
-                        <ListItemIcon>
-                            <SettingsIcon />
-                        </ListItemIcon>
+                    <NavLink currentUrl={props.currentUrl} targetUrl="/secretary-of-interior">
+                        <ListItemIcon><SettingsIcon /></ListItemIcon>
                         <ListItemText primary="Settings" />
-                    </ListItemButton>
-                    <ListItemButton component={Link} to="/secretary-of-interior">
-                        <ListItemIcon>
-                            <LogoutIcon />
-                        </ListItemIcon>
+                    </NavLink>
+                    <NavLink currentUrl={props.currentUrl} targetUrl="/secretary-of-interior">
+                        <ListItemIcon><LogoutIcon /></ListItemIcon>
                         <ListItemText primary="Logout" />
-                    </ListItemButton>
+                    </NavLink>
                 </List>
             </Drawer>
         </Fragment>

@@ -2,8 +2,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { titles } from "./components/titles/titles";
-import { Schedule } from "./pages/schedule";
+import { Authenticate } from "./components/authentication/Authenticate";
+import { titles } from "./components/titles/Titles";
+import { Schedule } from "./pages/Schedule";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 
@@ -24,11 +25,13 @@ root.render(
         <ThemeProvider theme={theme}>
             <BrowserRouter>
                 <Routes>
-                    <Route path={titles.secretaryOfStrategy.url} element={<Schedule title={titles.secretaryOfStrategy} />} />
-                    <Route path={titles.secretaryOfSecurity.url} element={<Schedule title={titles.secretaryOfSecurity} />} />
-                    <Route path={titles.secretaryOfDevelopment.url} element={<Schedule title={titles.secretaryOfDevelopment} />} />
-                    <Route path={titles.secretaryOfScience.url} element={<Schedule title={titles.secretaryOfScience} />} />
-                    <Route path={titles.secretaryOfInterior.url} element={<Schedule title={titles.secretaryOfInterior} />} />
+                    <Route path="/" element={<Authenticate />}>
+                        <Route path={titles.secretaryOfStrategy.url} element={<Schedule title={titles.secretaryOfStrategy} />} />
+                        <Route path={titles.secretaryOfSecurity.url} element={<Schedule title={titles.secretaryOfSecurity} />} />
+                        <Route path={titles.secretaryOfDevelopment.url} element={<Schedule title={titles.secretaryOfDevelopment} />} />
+                        <Route path={titles.secretaryOfScience.url} element={<Schedule title={titles.secretaryOfScience} />} />
+                        <Route path={titles.secretaryOfInterior.url} element={<Schedule title={titles.secretaryOfInterior} />} />
+                    </Route>
                 </Routes>
             </BrowserRouter>
         </ThemeProvider>
