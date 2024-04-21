@@ -27,6 +27,20 @@ const HeaderCell = styled(TableCell)(({ theme }) => ({
     },
 }));
 
+const SelectedRow = styled(TableRow)(({ theme }) => ({
+    backgroundColor: theme.palette.success.light,
+    "&:last-child td, &:last-child th": {
+        border: 0,
+    },
+}));
+
+const ReservedRow = styled(TableRow)(({ theme }) => ({
+    backgroundColor: theme.palette.action.disabled,
+    "&:last-child td, &:last-child th": {
+        border: 0,
+    },
+}));
+
 const BodyRow = styled(TableRow)(({ theme }) => ({
     "&:nth-of-type(odd)": {
         backgroundColor: theme.palette.action.hover,
@@ -38,9 +52,10 @@ const BodyRow = styled(TableRow)(({ theme }) => ({
 }));
 
 function defaultRows(stepSize: number): ScheduleRow[] {
+    const stepSizeMins = stepSize / 60 / 1000;
     const oneDayInMillis = 24 * 60 * 60 * 1000;
     const currentTime = new Date();
-    currentTime.setMinutes(Math.floor(currentTime.getMinutes() / 15) * 15, 0);
+    currentTime.setMinutes(Math.floor(currentTime.getMinutes() / stepSizeMins) * stepSizeMins, 0, 0);
     const startTime = currentTime.getTime();
 
     let rows: ScheduleRow[] = [];
@@ -60,6 +75,7 @@ function defaultRows(stepSize: number): ScheduleRow[] {
 
 interface ScheduleProps {
     title: Title;
+    username: string;
 }
 
 interface ScheduleRow {
@@ -88,7 +104,21 @@ export function Schedule(props: ScheduleProps): JSX.Element {
         const end = start + (24 * 60 * 60 * 1000);
 
         ApiClient.getInstance().queryScheduled(props.title.id, start, end).then((scheduled) => {
-            const rows = defaultRows(scheduled.info.slotInterval * 60 * 1000);
+            const stepSize = scheduled.info.slotInterval * 60 * 1000;
+            const rows = defaultRows(stepSize);
+            const startTime = rows[0].timestamp;
+
+            for (const schedule of scheduled.scheduled) {
+                const index = (schedule.timestamp - startTime) / stepSize;
+
+                if (rows[index].timestamp !== schedule.timestamp) {
+                    console.error(`Can't find row for timestamp ${schedule.timestamp}`);
+                    continue;
+                }
+
+                rows[index].account = schedule.inGameName;
+            }
+
             setState({ rows: rows, loading: false });
         });
     }, [props]);
@@ -144,13 +174,19 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                                         <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                     </TableCell>
                                     <TableCell align={"center"}>Reserve</TableCell>
-                                </BodyRow> :
-                                <BodyRow key={row.timestamp}>
-                                    <TableCell component="th" scope="row">
-                                        <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
-                                    </TableCell>
-                                    <TableCell align={"center"}>row.account</TableCell>
-                                </BodyRow>
+                                </BodyRow> : row.account === props.username ?
+                                    <SelectedRow key={row.timestamp}>
+                                        <TableCell component="th" scope="row">
+                                            <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
+                                        </TableCell>
+                                        <TableCell align={"center"}>{row.account}</TableCell>
+                                    </SelectedRow> :
+                                    <ReservedRow key={row.timestamp}>
+                                        <TableCell component="th" scope="row">
+                                            <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
+                                        </TableCell>
+                                        <TableCell align={"center"}>{row.account}</TableCell>
+                                    </ReservedRow>
                             )}
                         </TableBody>
                     </Table>

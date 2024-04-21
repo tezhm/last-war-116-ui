@@ -26,11 +26,11 @@ root.render(
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Authenticate />}>
-                        <Route path={titles.secretaryOfStrategy.url} element={<Schedule title={titles.secretaryOfStrategy} />} />
-                        <Route path={titles.secretaryOfSecurity.url} element={<Schedule title={titles.secretaryOfSecurity} />} />
-                        <Route path={titles.secretaryOfDevelopment.url} element={<Schedule title={titles.secretaryOfDevelopment} />} />
-                        <Route path={titles.secretaryOfScience.url} element={<Schedule title={titles.secretaryOfScience} />} />
-                        <Route path={titles.secretaryOfInterior.url} element={<Schedule title={titles.secretaryOfInterior} />} />
+                        <Route path={titles.secretaryOfStrategy.url} element={<Schedule username={"asdads"} title={titles.secretaryOfStrategy} />} />
+                        <Route path={titles.secretaryOfSecurity.url} element={<Schedule username={"asdads"} title={titles.secretaryOfSecurity} />} />
+                        <Route path={titles.secretaryOfDevelopment.url} element={<Schedule username={"asdads"} title={titles.secretaryOfDevelopment} />} />
+                        <Route path={titles.secretaryOfScience.url} element={<Schedule username={"asdads"} title={titles.secretaryOfScience} />} />
+                        <Route path={titles.secretaryOfInterior.url} element={<Schedule username={"asdads"} title={titles.secretaryOfInterior} />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
