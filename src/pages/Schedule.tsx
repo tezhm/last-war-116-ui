@@ -1,8 +1,15 @@
+import Alert from "@mui/material/Alert";
 import Backdrop from "@mui/material/Backdrop";
+import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import Fade from "@mui/material/Fade";
 import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
 import { styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -88,16 +95,30 @@ interface ScheduleRow {
 interface ScheduleState {
     rows: ScheduleRow[];
     loading: boolean;
+    showDialog: boolean;
+    index: number|null;
+    timestamp: number|null;
+    timeString: string|null;
+    snackbar: {
+        children?: JSX.Element;
+        message?: string;
+        autoHideDuration?: number;
+    }|null;
 }
 
 export function Schedule(props: ScheduleProps): JSX.Element {
     const [state, setState] = useState<ScheduleState>({
         rows: [],
         loading: true,
+        showDialog: false,
+        index: null,
+        timestamp: null,
+        timeString: null,
+        snackbar: null,
     });
 
     useEffect(() => {
-        setState({ rows: [], loading: true });
+        setState((state) => ({ ...state, rows: [], loading: true }));
 
         const currentTime = new Date();
         const start = currentTime.getTime();
@@ -119,7 +140,7 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                 rows[index].account = schedule.inGameName;
             }
 
-            setState({ rows: rows, loading: false });
+            setState((state) => ({ ...state, rows: rows, loading: false }));
         });
     }, [props]);
 
@@ -169,7 +190,13 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                         </TableHead>
                         <TableBody>
                             { state.rows.map((row, index) => (row.account === null) ?
-                                <BodyRow key={row.timestamp} hover>
+                                <BodyRow key={row.timestamp} hover onClick={() => setState({
+                                    ...state,
+                                    showDialog: true,
+                                    index: index,
+                                    timestamp: row.timestamp,
+                                    timeString: row.timeString
+                                })}>
                                     <TableCell component="th" scope="row">
                                         <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                     </TableCell>
@@ -192,6 +219,44 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                     </Table>
                 </TableContainer>
             </Paper>
+            <Dialog open={state.showDialog} onClose={() => setState({ ...state, showDialog: false })}>
+                <DialogContent>
+                    <DialogContentText>
+                        Reserve {props.title.name} at {state.timeString}?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={async () => {
+                        setState((state) => ({ ...state, showDialog: false, loading: true }));
+
+                        if (state.timestamp) {
+                            try {
+                                await ApiClient.getInstance().reserve(props.title.id, state.timestamp);
+                                setState((state) => {
+                                    state.rows[state.index ?? -1].account = props.username;
+                                    return { ...state, loading: false };
+                                });
+                            } catch (error) {
+                                setState((state) => ({
+                                    ...state,
+                                    loading: false,
+                                    snackbar: {
+                                        children: <Alert severity="error" variant="filled" sx={{ width: "100%" }}>{String(error)}</Alert>,
+                                    },
+                                }));
+                            }
+                        }
+                    }}>Yes</Button>
+                    <Button onClick={() => setState({ ...state, showDialog: false })}>No</Button>
+                </DialogActions>
+            </Dialog>
+            <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                      open={!!state.snackbar}
+                      onClose={() => setState({ ...state, snackbar: null })}
+                      message={state.snackbar?.message}
+                      autoHideDuration={state.snackbar?.autoHideDuration}>
+                {state.snackbar?.children}
+            </Snackbar>
         </Dashboard>
     );
 }
