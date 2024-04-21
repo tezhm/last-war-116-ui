@@ -121,8 +121,9 @@ export function Schedule(props: ScheduleProps): JSX.Element {
         setState((state) => ({ ...state, rows: [], loading: true }));
 
         const currentTime = new Date();
+        currentTime.setMinutes(0, 0, 0);
         const start = currentTime.getTime();
-        const end = start + (24 * 60 * 60 * 1000);
+        const end = start + (25 * 60 * 60 * 1000);
 
         ApiClient.getInstance().queryScheduled(props.title.id, start, end).then((scheduled) => {
             const stepSize = scheduled.info.slotInterval * 60 * 1000;
@@ -132,8 +133,7 @@ export function Schedule(props: ScheduleProps): JSX.Element {
             for (const schedule of scheduled.scheduled) {
                 const index = (schedule.timestamp - startTime) / stepSize;
 
-                if (rows[index].timestamp !== schedule.timestamp) {
-                    console.error(`Can't find row for timestamp ${schedule.timestamp}`);
+                if (!rows[index] || rows[index].timestamp !== schedule.timestamp) {
                     continue;
                 }
 

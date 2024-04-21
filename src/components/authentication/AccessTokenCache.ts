@@ -2,6 +2,8 @@ export const ACCESS_TOKEN_KEY: string = "_at";
 
 export class AccessTokenCache {
     private static instance: AccessTokenCache|null = null;
+    private accessToken: string|null = null;
+    private loaded: boolean = false;
 
     public static getInstance(): AccessTokenCache {
         if (AccessTokenCache.instance === null) {
@@ -13,13 +15,20 @@ export class AccessTokenCache {
 
     public update(accessToken: string): void {
         localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+        this.accessToken = accessToken;
+        this.loaded = true;
     }
 
     public invalidate(): void {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
+        this.loaded = false;
     }
 
     public loadAccessToken(): string|null {
+        if (this.loaded) {
+            return this.accessToken;
+        }
+
         const searchParams: URLSearchParams = new URLSearchParams(window.location.search);
 
         // Checking url for access token
@@ -33,6 +42,13 @@ export class AccessTokenCache {
         }
 
         // Relying on local storage when no access token in url
-        return localStorage.getItem(ACCESS_TOKEN_KEY);
+        const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+
+        if (!accessToken) {
+            return null;
+        }
+
+        this.update(accessToken);
+        return accessToken;
     }
 }

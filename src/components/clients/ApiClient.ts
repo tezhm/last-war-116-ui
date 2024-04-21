@@ -4,7 +4,6 @@ import { Scheduled } from "./types";
 
 export class ApiClient {
     private static instance: ApiClient|null = null;
-    private accessToken: string|null = null;
 
     public static getInstance(): ApiClient {
         if (ApiClient.instance === null) {
@@ -12,14 +11,6 @@ export class ApiClient {
         }
 
         return ApiClient.instance;
-    }
-
-    public setAccessToken(accessToken: string): void {
-        this.accessToken = accessToken;
-    }
-
-    public clearAccessToken(): void {
-        this.accessToken = null;
     }
 
     public async queryScheduled(title: string, start: number, end: number): Promise<Scheduled> {
@@ -96,7 +87,6 @@ export class ApiClient {
         // Pre-flight can return successfully when failing authentication
         if (!response.ok) {
             if (response.status === 401) {
-                this.clearAccessToken();
                 AccessTokenCache.getInstance().invalidate();
                 window.location.href = "/login";
             }
@@ -128,11 +118,13 @@ export class ApiClient {
     }
 
     private getAccessToken(): string {
-        if (this.accessToken === null) {
+        const accessToken = AccessTokenCache.getInstance().loadAccessToken();
+
+        if (accessToken === null) {
             throw new Error("Access token not set");
         }
 
-        return this.accessToken;
+        return accessToken;
     }
 
     private async decodeResponse(response: Response): Promise<any|null> {
