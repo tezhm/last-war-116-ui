@@ -6,6 +6,7 @@ import { Authenticate } from "./components/authentication/Authenticate";
 import { titles } from "./components/titles/Titles";
 import { Login } from "./pages/Login";
 import { Schedule } from "./pages/Schedule";
+import { Signup } from "./pages/Signup";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 
@@ -26,7 +27,8 @@ root.render(
         <ThemeProvider theme={theme}>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/login" index element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
                     <Route path="/" element={<Authenticate />}>
                         <Route path={titles.secretaryOfStrategy.url} element={<Schedule username={"asdads"} title={titles.secretaryOfStrategy} />} />
                         <Route path={titles.secretaryOfSecurity.url} element={<Schedule username={"asdads"} title={titles.secretaryOfSecurity} />} />

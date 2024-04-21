@@ -200,7 +200,7 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                                     <TableCell component="th" scope="row">
                                         <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                     </TableCell>
-                                    <TableCell align={"center"}>Reserve</TableCell>
+                                    <TableCell align={"center"}></TableCell>
                                 </BodyRow> : row.account === props.username ?
                                     <SelectedRow key={row.timestamp}>
                                         <TableCell component="th" scope="row">

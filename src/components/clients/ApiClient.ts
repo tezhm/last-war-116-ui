@@ -42,6 +42,16 @@ export class ApiClient {
         return (await response.json()).accessToken;
     }
 
+    public async subscribe(username: string, password: string, inGameName: string): Promise<{ accessToken: string, verificationCode: string }> {
+        const response = await this.post(`/v1/subscribe`, undefined, { username, password, inGameName });
+
+        if (!response) {
+            throw new Error(`Failed to sign up`);
+        }
+
+        return await response.json();
+    }
+
     public async reserve(title: string, timestamp: number): Promise<void> {
         const response = await this.authPost(`/v1/schedule/${title}/reserve/${timestamp}`);
 
