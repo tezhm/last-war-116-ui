@@ -1,32 +1,23 @@
-import Backdrop from "@mui/material/Backdrop";
-import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Container from "@mui/material/Container";
-import Fade from "@mui/material/Fade";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 import Grid from "@mui/material/Grid";
-import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
 import Snackbar from "@mui/material/Snackbar";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { ChangeEvent, FormEvent, JSX, useEffect, useState } from "react";
 import { ApiClient } from "../components/clients/ApiClient";
 import { Dashboard } from "../components/layout/Dashboard";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import IconButton from "@mui/material/IconButton";
-import ButtonBase from "@mui/material/ButtonBase";
-import Alert from "@mui/material/Alert";
-
 
 interface SettingsState {
     inGameName: string|null;
     verificationCode: string|null;
     isVerified: boolean;
-    loading: boolean;
     snackbar: {
         children?: JSX.Element;
         message?: string;
@@ -39,7 +30,6 @@ export function Settings(): JSX.Element {
         inGameName: null,
         verificationCode: null,
         isVerified: false,
-        loading: false,
         snackbar: null,
     });
     const [passwordFormData, setPasswordFormData] = useState({
@@ -159,32 +149,6 @@ export function Settings(): JSX.Element {
 
     return (
         <Dashboard pageTitle="Settings" currentUrl="/settings">
-            <Modal
-                aria-labelledby="transition-modal-title"
-                aria-describedby="transition-modal-description"
-                open={state.loading}
-                closeAfterTransition
-                slots={{ backdrop: Backdrop }}
-                slotProps={{
-                    backdrop: {
-                        timeout: 500,
-                    },
-                }}
-                disableAutoFocus={true}
-            >
-                <Fade in={state.loading}>
-                    <CircularProgress
-                        sx={{
-                            color: "white",
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            marginTop: `${-indicatorSize / 2}px`,
-                            marginLeft: `${-indicatorSize / 2}px`
-                        }}
-                    />
-                </Fade>
-            </Modal>
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>

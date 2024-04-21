@@ -39,6 +39,7 @@ const SelectedRow = styled(TableRow)(({ theme }) => ({
     "&:last-child td, &:last-child th": {
         border: 0,
     },
+    cursor: "pointer",
 }));
 
 const ReservedRow = styled(TableRow)(({ theme }) => ({
@@ -95,10 +96,18 @@ interface ScheduleState {
     inGameName: string|null;
     rows: ScheduleRow[];
     loading: boolean;
-    showDialog: boolean;
-    index: number|null;
-    timestamp: number|null;
-    timeString: string|null;
+    showReserveDialog: boolean;
+    reserveSettings: {
+        index: number;
+        timestamp: number;
+        timeString: string;
+    }|null;
+    showCancelDialog: boolean;
+    cancelSettings: {
+        index: number;
+        timestamp: number;
+        timeString: string;
+    }|null;
     snackbar: {
         children?: JSX.Element;
         message?: string;
@@ -111,10 +120,10 @@ export function Schedule(props: ScheduleProps): JSX.Element {
         inGameName: null,
         rows: [],
         loading: true,
-        showDialog: false,
-        index: null,
-        timestamp: null,
-        timeString: null,
+        showReserveDialog: false,
+        reserveSettings: null,
+        showCancelDialog: false,
+        cancelSettings: null,
         snackbar: null,
     });
 
@@ -197,17 +206,27 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                             { state.rows.map((row, index) => (row.account === null) ?
                                 <BodyRow key={row.timestamp} hover onClick={() => setState((state) => ({
                                     ...state,
-                                    showDialog: true,
-                                    index: index,
-                                    timestamp: row.timestamp,
-                                    timeString: row.timeString
+                                    showReserveDialog: true,
+                                    reserveSettings: {
+                                        index: index,
+                                        timestamp: row.timestamp,
+                                        timeString: row.timeString
+                                    },
                                 }))}>
                                     <TableCell component="th" scope="row">
                                         <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                     </TableCell>
                                     <TableCell align={"center"}></TableCell>
                                 </BodyRow> : row.account === state.inGameName ?
-                                    <SelectedRow key={row.timestamp}>
+                                    <SelectedRow key={row.timestamp} onClick={() => setState((state) => ({
+                                        ...state,
+                                        showCancelDialog: true,
+                                        cancelSettings: {
+                                            index: index,
+                                            timestamp: row.timestamp,
+                                            timeString: row.timeString
+                                        },
+                                    }))}>
                                         <TableCell component="th" scope="row">
                                             <i>{row.dateString}</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.timeString}
                                         </TableCell>
@@ -224,21 +243,21 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                     </Table>
                 </TableContainer>
             </Paper>
-            <Dialog open={state.showDialog} onClose={() => setState({ ...state, showDialog: false })}>
+            <Dialog open={state.showReserveDialog} onClose={() => setState({ ...state, showReserveDialog: false })}>
                 <DialogContent>
                     <DialogContentText>
-                        Reserve {props.title.name} at {state.timeString}?
+                        Reserve {props.title.name} at {state.reserveSettings?.timeString}?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={async () => {
-                        setState((state) => ({ ...state, showDialog: false, loading: true }));
+                        setState((state) => ({ ...state, showReserveDialog: false, loading: true }));
 
-                        if (state.timestamp) {
+                        if (state.reserveSettings?.timestamp) {
                             try {
-                                await ApiClient.getInstance().reserve(props.title.id, state.timestamp);
+                                await ApiClient.getInstance().reserve(props.title.id, state.reserveSettings?.timestamp);
                                 setState((state) => {
-                                    state.rows[state.index ?? -1].account = state.inGameName;
+                                    state.rows[state.reserveSettings?.index ?? -1].account = state.inGameName;
                                     return { ...state, loading: false };
                                 });
                             } catch (error) {
@@ -252,7 +271,38 @@ export function Schedule(props: ScheduleProps): JSX.Element {
                             }
                         }
                     }}>Yes</Button>
-                    <Button onClick={() => setState({ ...state, showDialog: false })}>No</Button>
+                    <Button onClick={() => setState({ ...state, showReserveDialog: false })}>No</Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={state.showCancelDialog} onClose={() => setState({ ...state, showCancelDialog: false })}>
+                <DialogContent>
+                    <DialogContentText>
+                        Cancel {props.title.name} at {state.cancelSettings?.timeString}?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={async () => {
+                        setState((state) => ({ ...state, showCancelDialog: false, loading: true }));
+
+                        if (state.cancelSettings?.timestamp) {
+                            try {
+                                await ApiClient.getInstance().cancel(props.title.id, state.cancelSettings?.timestamp);
+                                setState((state) => {
+                                    state.rows[state.cancelSettings?.index ?? -1].account = null;
+                                    return { ...state, loading: false };
+                                });
+                            } catch (error) {
+                                setState((state) => ({
+                                    ...state,
+                                    loading: false,
+                                    snackbar: {
+                                        children: <Alert severity="error" variant="filled" sx={{ width: "100%" }}>{String(error)}</Alert>,
+                                    },
+                                }));
+                            }
+                        }
+                    }}>Yes</Button>
+                    <Button onClick={() => setState({ ...state, showCancelDialog: false })}>No</Button>
                 </DialogActions>
             </Dialog>
             <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "center" }}

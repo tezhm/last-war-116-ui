@@ -61,6 +61,14 @@ export class ApiClient {
         }
     }
 
+    public async cancel(title: string, timestamp: number): Promise<void> {
+        const response = await this.authPost(`/v1/schedule/${title}/cancel/${timestamp}`);
+
+        if (!response) {
+            throw new Error(`Failed to cancel ${title} at ${timestamp}`);
+        }
+    }
+
     public async changeInGameName(inGameName: string): Promise<void> {
         const response = await this.authPost("/v1/user/change-in-game-name", undefined, { inGameName });
 
