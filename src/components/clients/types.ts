@@ -2,6 +2,7 @@ export interface UserInfo {
     isAdmin: boolean;
     inGameName: string;
     verificationCode: string;
+    otpAuthCode: string;
 }
 
 export interface ScheduleInfo {

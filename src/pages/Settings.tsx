@@ -10,14 +10,17 @@ import Paper from "@mui/material/Paper";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChangeEvent, FormEvent, JSX, useEffect, useState } from "react";
+import qrcode from "qrcode";
+import { ChangeEvent, FormEvent, JSX, useEffect, useRef, useState } from "react";
 import { ApiClient } from "../components/clients/ApiClient";
 import { Dashboard } from "../components/layout/Dashboard";
+import { Link } from "react-router-dom";
 
 interface SettingsState {
     inGameName: string|null;
     verificationCode: string|null;
     isVerified: boolean;
+    otpAuthCode: string|null;
     snackbar: {
         children?: JSX.Element;
         message?: string;
@@ -30,15 +33,8 @@ export function Settings(): JSX.Element {
         inGameName: null,
         verificationCode: null,
         isVerified: false,
+        otpAuthCode: null,
         snackbar: null,
-    });
-    const [passwordFormData, setPasswordFormData] = useState({
-        currentPassword: "",
-        newPassword: "",
-    });
-    const [passwordErrors, setPasswordErrors] = useState({
-        currentPassword: "",
-        newPassword: "",
     });
     const [inGameNameFormData, setInGameNameFormData] = useState({
         inGameName: "",
@@ -46,6 +42,7 @@ export function Settings(): JSX.Element {
     const [inGameNameErrors, setInGameNameErrors] = useState({
         inGameName: "",
     });
+    const canvasRef = useRef(null);
 
     useEffect(() => {
         ApiClient.getInstance().queryUserInfo().then((userInfo) => {
@@ -53,53 +50,16 @@ export function Settings(): JSX.Element {
                 ...state,
                 inGameName: userInfo.inGameName,
                 verificationCode: userInfo.verificationCode,
+                otpAuthCode: userInfo.otpAuthCode,
             }));
         });
     }, []);
 
-    const validatePassword = () => {
-        let valid = true;
-        const newErrors = { currentPassword: "", newPassword: "" };
-
-        if (!passwordFormData.currentPassword || passwordFormData.currentPassword.length < 8 || passwordFormData.currentPassword.length > 20) {
-            newErrors.currentPassword = "Password must be between 8 and 20 characters in length";
-            valid = false;
+    useEffect(() => {
+        if (state.otpAuthCode && canvasRef.current) {
+            qrcode.toCanvas(canvasRef.current, state.otpAuthCode);
         }
-
-        if (!passwordFormData.newPassword || passwordFormData.newPassword.length < 8 || passwordFormData.newPassword.length > 20) {
-            newErrors.newPassword = "Password must be between 8 and 20 characters in length";
-            valid = false;
-        }
-
-        setPasswordErrors(newErrors);
-        return valid;
-    };
-
-    const changePassword = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        if (validatePassword()) {
-            try {
-                await ApiClient.getInstance().changePassword(passwordFormData.currentPassword, passwordFormData.newPassword);
-                setState((state) => ({
-                    ...state,
-                    snackbar: {
-                        children: <Alert severity="success" variant="filled" sx={{ width: "100%" }}>Successfully changed password</Alert>
-                    },
-                }));
-            } catch {
-                setPasswordErrors({ currentPassword: "Failed to change password", newPassword: "Failed to change password" });
-            }
-        }
-    };
-
-    const storePassword = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setPasswordFormData((formData) => ({
-            ...formData,
-            [name]: value.trim(),
-        }));
-    };
+    }, [state.otpAuthCode]);
 
     const validateInGameName = () => {
         if (!inGameNameFormData.inGameName || inGameNameFormData.inGameName.length < 2 || inGameNameFormData.inGameName.length > 20) {
@@ -165,44 +125,10 @@ export function Settings(): JSX.Element {
                     </Grid>
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-                            <Box component="form" onSubmit={changePassword} noValidate>
-                                <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                    Change password
-                                </Typography>
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    name="currentPassword"
-                                    label="Current password"
-                                    type="password"
-                                    id="current-password"
-                                    autoComplete="current-password"
-                                    onChange={storePassword}
-                                    error={Boolean(passwordErrors.currentPassword)}
-                                    helperText={passwordErrors.currentPassword}
-                                />
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    name="newPassword"
-                                    label="New password"
-                                    type="password"
-                                    id="new-password"
-                                    autoComplete="new-password"
-                                    onChange={storePassword}
-                                    error={Boolean(passwordErrors.newPassword)}
-                                    helperText={passwordErrors.newPassword}
-                                />
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Change password
-                                </Button>
-                            </Box>
+                            <Typography component="h2" variant="h6" color="primary" gutterBottom>
+                                Two Factor Authentication
+                            </Typography>
+                            <Link to={state.otpAuthCode ?? "#"}><canvas ref={canvasRef}></canvas></Link>
                         </Paper>
                     </Grid>
                     <Grid item xs={12}>
