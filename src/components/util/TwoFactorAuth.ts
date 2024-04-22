@@ -17,17 +17,23 @@ export class TwoFactorAuth {
         const buffer = await this.randomBytes(14);
         const secret = base32Encode(buffer, "RFC4648", { padding: false });
         const account = encodeURI(username);
-        const issuer = encodeURI("#116 Title Reservations");
+        const issuer = encodeURI("www.lastwar116.com");
         const otpType = "totp";
         const algorithm = "SHA1";
-        const digits = "6";
-        const period = "30";
+        const digits = 6;
+        const period = 30;
         return `otpauth://${otpType}/${issuer}:${account}?algorithm=${algorithm}&digits=${digits}&period=${period}&issuer=${issuer}&secret=${secret}`;
     }
 
-    public verifyTotp(token: string, secret: string, window: number = 1) {
+    public verifyTotp(token: string, otpAuthCode: string, window: number = 1): boolean {
+        const parts = otpAuthCode.split("&secret=");
+
+        if (parts.length !== 2) {
+            return false;
+        }
+
         for (let errorWindow = -window; errorWindow <= +window; errorWindow++) {
-            const totp = this.generateTotp(secret, errorWindow);
+            const totp = this.generateTotp(parts[1], errorWindow);
 
             if (token === totp) {
                 return true;

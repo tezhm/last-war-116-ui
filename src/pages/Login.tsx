@@ -67,7 +67,7 @@ export function Login(): JSX.Element {
             try {
                 const accessToken = await ApiClient.getInstance().login(formData.username, formData.password);
                 AccessTokenCache.getInstance().update(accessToken);
-                window.location.href = titles.secretaryOfStrategy.url;
+                window.location.replace(titles.secretaryOfStrategy.url);
             } catch (error) {
                 setState((state) => ({ ...state, snackbar: {
                     children: <Alert severity="error" variant="filled" sx={{ width: "100%" }}>Login failed</Alert>,
