@@ -27,12 +27,12 @@ export function Login(): JSX.Element {
     const [state, setState] = useState<LoginState>({ snackbar: null });
     const [formData, setFormData] = useState({
         username: "",
-        password: "",
+        token: "",
         rememberMe: false,
     });
     const [errors, setErrors] = useState({
         username: "",
-        password: "",
+        token: "",
     });
 
     const accessToken = AccessTokenCache.getInstance().loadAccessToken();
@@ -44,15 +44,15 @@ export function Login(): JSX.Element {
 
     const validateForm = () => {
         let valid = true;
-        const newErrors = { username: "", password: "" };
+        const newErrors = { username: "", token: "" };
 
         if (!formData.username) {
             newErrors.username = "Username is required";
             valid = false;
         }
 
-        if (!formData.password || formData.password.length < 8 || formData.password.length > 20) {
-            newErrors.password = "Password must be between 8 and 20 characters in length";
+        if (!formData.token || formData.token.length < 6 || formData.token.length > 6) {
+            newErrors.token = "Must be 6 digits";
             valid = false;
         }
 
@@ -65,7 +65,7 @@ export function Login(): JSX.Element {
 
         if (validateForm()) {
             try {
-                const accessToken = await ApiClient.getInstance().login(formData.username, formData.password);
+                const accessToken = await ApiClient.getInstance().login(formData.username, formData.token);
                 AccessTokenCache.getInstance().update(accessToken);
                 window.location.replace(titles.secretaryOfStrategy.url);
             } catch (error) {
@@ -115,14 +115,13 @@ export function Login(): JSX.Element {
                         margin="normal"
                         required
                         fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
+                        name="token"
+                        label="Two Factor Authentication Code"
+                        type="number"
+                        id="token"
                         onChange={handleChange}
-                        error={Boolean(errors.password)}
-                        helperText={errors.password}
+                        error={Boolean(errors.token)}
+                        helperText={errors.token}
                     />
                     <FormControlLabel
                         control={<Checkbox checked={formData.rememberMe} onChange={handleChange} name="rememberMe" color="primary" />}
@@ -138,12 +137,8 @@ export function Login(): JSX.Element {
                     </Button>
                     <Grid container>
                         <Grid item xs>
-                            <Link href="#" variant="body2" onClick={
-                                () => setState({ ...state, snackbar: {
-                                    children: <Alert severity="error" variant="filled" sx={{ width: "100%" }}>Not implemented yet sorry</Alert>,
-                                }})
-                            }>
-                                Forgot password?
+                            <Link href="https://buymeacoffee.com/tezhm" variant="body2">
+                                Buy sm0lpp a coffee ☕
                             </Link>
                         </Grid>
                         <Grid item>

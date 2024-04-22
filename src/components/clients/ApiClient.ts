@@ -33,8 +33,8 @@ export class ApiClient {
         return await response.json();
     }
 
-    public async login(username: string, password: string): Promise<string> {
-        const response = await this.post(`/v1/login`, undefined, { username, password });
+    public async login(username: string, token: string): Promise<string> {
+        const response = await this.post(`/v1/login`, undefined, { username, token });
 
         if (!response) {
             throw new Error(`Failed to login`);
