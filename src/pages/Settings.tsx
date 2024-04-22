@@ -57,8 +57,6 @@ export function Settings(): JSX.Element {
         });
     }, []);
 
-    const indicatorSize = 80;
-
     const validatePassword = () => {
         let valid = true;
         const newErrors = { currentPassword: "", newPassword: "" };
