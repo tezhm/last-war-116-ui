@@ -9,8 +9,7 @@ import Link from "@mui/material/Link";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChangeEvent, FormEvent, JSX, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { ChangeEvent, FormEvent, JSX, useEffect, useState } from "react";
 import { AccessTokenCache } from "../components/authentication/AccessTokenCache";
 import { ApiClient } from "../components/clients/ApiClient";
 import { titles } from "../components/titles/Titles";
@@ -35,12 +34,17 @@ export function Login(): JSX.Element {
         token: "",
     });
 
-    const accessToken = AccessTokenCache.getInstance().loadAccessToken();
+    useEffect(() => {
+        const accessToken = AccessTokenCache.getInstance().loadAccessToken();
 
-    if (accessToken) {
-        AccessTokenCache.getInstance().update(accessToken);
-        return <Navigate to={titles.secretaryOfStrategy.url} />
-    }
+        if (accessToken) {
+            window.location.replace(titles.secretaryOfStrategy.url);
+        }
+
+        setState((state) => ({ ...state, snackbar: {
+            children: <Alert severity="info" variant="filled" sx={{ width: "100%" }}>We've gone passwordless! Please create a new account if you haven't already</Alert>,
+        }}));
+    }, []);
 
     const validateForm = () => {
         let valid = true;
