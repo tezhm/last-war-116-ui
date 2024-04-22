@@ -13,6 +13,18 @@ export class ApiClient {
         return ApiClient.instance;
     }
 
+    public async authenticate(): Promise<void> {
+        try {
+            const response = await this.authFetch("/v1/authenticate");
+
+            if (!response || !response.ok) {
+                throw new Error("Failed authentication");
+            }
+        } catch {
+            throw new Error("Failed authentication");
+        }
+    }
+
     public async queryUserInfo(): Promise<UserInfo> {
         const response = await this.authFetch("/v1/user/info");
 

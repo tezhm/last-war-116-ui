@@ -1,3 +1,5 @@
+import { ApiClient } from "../clients/ApiClient";
+
 export const ACCESS_TOKEN_KEY: string = "_at";
 
 export class AccessTokenCache {
@@ -17,6 +19,10 @@ export class AccessTokenCache {
         localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
         this.accessToken = accessToken;
         this.loaded = true;
+        ApiClient.getInstance().authenticate().catch(() => {
+            this.invalidate();
+            window.location.href = "/login";
+        });
     }
 
     public invalidate(): void {
